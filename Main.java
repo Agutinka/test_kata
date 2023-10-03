@@ -48,6 +48,8 @@ public class Main {
                 b = Byte.parseByte(strings[1]);
                 if (a > 10 || a < 0 || b > 10 || b < 0) { //Исключение+выход из калькулятора при вводе чисел >10 или <0
                     throw new Exception("Ошибка - калькулятор умеет работать только с целыми арабскими или римскими цифрами от 1 до 10 включительно.");
+                } else if (a == 0 || b == 0) {
+                    throw new Exception("Ошибка - один из операндов равен нулю.");
                 } else {
                     result = calcInt(a, b, operatorChar);
                     System.out.println("Ответ: " + result);
