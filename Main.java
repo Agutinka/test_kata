@@ -1,18 +1,15 @@
 import java.util.Scanner;
-
 public class Main {
     static Scanner inputCalcAgain = new Scanner(System.in); //сканер вынесен отдельно в static, чтобы каждый раз при вызове не прописывать его
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         System.out.println("Введите арифметическое выражение без пробелов, одновременно состоящее из 2-х арабских или 2-х римских чисел от 1 до 10 включительно.");
         System.out.println(calc(inputCalcAgain.nextLine()));
         inputCalcAgain.close();
     }
-
-    public static String calc(String input) {
-        byte a = 0;
-        byte b = 0;
-        char[] inputChar = new char[7];
+    public static String calc(String input) throws Exception {
+        byte a;
+        byte b;
+        char[] inputChar = new char[8];
         char operatorChar = '+';
         String operatorStr = "";
         for (byte i = 1; i < input.length(); i++) { //Прохожу циклом по массиву строк, нахожу знак операции и помещаю его в ячейку char operatorChar и элемент строки operatorStr
@@ -36,41 +33,45 @@ public class Main {
         }
         int result;
         String[] strings = input.split(operatorStr); //Принятую строку разделяю на символы по знаку операции с помощью элемента строки operatorStr
-            try {
-                a = romanNumbers(strings[0]);
-                b = romanNumbers(strings[1]);
-            } catch (ArrayIndexOutOfBoundsException e) { //Исключение+выход из калькулятора при неправильном вводе арифметического выражения
-                System.out.println("Ошибка - нужно ввести число, знак операции, число - без пробелов.");
-            }
+        if (strings.length != 2) {
+            throw new Exception("Введено больше двух чисел и одного знака операции либо введён неверный знак операции");
+        }
+        try {
+            a = romanNumbers(strings[0]);
+            b = romanNumbers(strings[1]);
+        } catch (ArrayIndexOutOfBoundsException e) { //Исключение+выход из калькулятора при неправильном вводе арифметического выражения
+            throw new Exception("Ошибка - нужно ввести число, знак операции, число - без пробелов.");
+        }
         if (a == 0 || b == 0) {
             try {
                 a = Byte.parseByte(strings[0]);
                 b = Byte.parseByte(strings[1]);
-                    if (a > 10 || a < 0 || b > 10 || b < 0) { //Исключение+выход из калькулятора при вводе чисел >10 или <0
-                        System.out.println("Ошибка - калькулятор умеет работать только с целыми арабскими или римскими цифрами от 1 до 10 включительно.");
-                    }
-                result = calcInt(a, b, operatorChar);
-                System.out.println("Ответ: " + result);
+                if (a > 10 || a < 0 || b > 10 || b < 0) { //Исключение+выход из калькулятора при вводе чисел >10 или <0
+                    throw new Exception("Ошибка - калькулятор умеет работать только с целыми арабскими или римскими цифрами от 1 до 10 включительно.");
+                } else {
+                    result = calcInt(a, b, operatorChar);
+                    System.out.println("Ответ: " + result);
+                }
             } catch (NumberFormatException e) { //Исключение+выход из калькулятора при одновременном вводе римских и арабских цифр
-                System.out.println("Ошибка - калькулятор умеет работать одновременно только с арабскими или только римскими целыми числами от 1 до 10 включительно.");
+                throw new Exception("Ошибка - калькулятор умеет работать одновременно только с арабскими или только римскими целыми числами от 1 до 10 включительно.");
             } catch (ArithmeticException e) { //Исключение+выход из калькулятора при арифметической ошибке-делении на ноль. Не должна выпадать, т.к. есть предыдущее исключение - вводимые цифры больше 0
-                System.out.println("Ошибка - на ноль делить нельзя.");
+                throw new Exception("Ошибка - на ноль делить нельзя.");
             }
         } else {
             try {
                 result = calcInt(a, b, operatorChar);
-                    if (result < 1) { //Исключение+выход из калькулятора при отрицательном ответе или 0 в вычислениях с римскими цифрами
-                        System.out.println("Ошибка - результатом работы калькулятора с римскими числами могут быть только положительные числа.");
-                    }
+                if (result < 1) { //Исключение+выход из калькулятора при отрицательном ответе или 0 в вычислениях с римскими цифрами
+                    throw new Exception("Ошибка - результатом работы калькулятора с римскими числами могут быть только положительные числа.");
+                }
                 String resultRoman = romanTrans(result-1);
                 System.out.println("Ответ: " + resultRoman);
-            } catch (ArrayIndexOutOfBoundsException e) {
-                System.out.println("Ошибка - результатом работы калькулятора с римскими числами могут быть только положительные числа.");
+            } catch (Exception e) {
+                throw new Exception("Ошибка - результатом работы калькулятора с римскими числами могут быть только положительные числа.");
             }
         }
         return "";
     }
-    public static int calcInt(byte a, byte b, char operatorChar) { //собственно, метод calc - вычисление результата в зависимости от введённого знака операции, помещённого в ячейку char operatorChar
+    public static int calcInt(byte a, byte b, char operatorChar) { //собственно, вычисление результата в зависимости от введённого знака операции, помещённого в ячейку char operatorChar
         int result = 0;
         switch (operatorChar) {
             case '+':
