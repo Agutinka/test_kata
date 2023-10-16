@@ -1,126 +1,85 @@
 import java.util.Scanner;
 public class Main {
-    static Scanner inputCalcAgain = new Scanner(System.in); //сканер вынесен отдельно в static, чтобы каждый раз при вызове не прописывать его
+    static Scanner scanInput = new Scanner(System.in); //статический сканер перед main для однократного его написания, потом только вызывать
     public static void main(String[] args) throws Exception {
-        System.out.println("Введите арифметическое выражение без пробелов, одновременно состоящее из 2-х арабских или 2-х римских чисел от 1 до 10 включительно.");
-        System.out.println(calc(inputCalcAgain.nextLine()));
-        inputCalcAgain.close();
+        System.out.println("Доступны операции сложения строк, вычитания строки из строки, умножения строки на число и деления строки на число: \n\"a\" + \"b\", \"a\" - \"b\", \"a\" * b, \"a\" / b. Данные передаются в одну строку.\nЗначения строк, передаваемых в выражении, выделяются двойными кавычками.");
+        System.out.println("Введите строковое выражение, соответствующее условиям.");
+        calcStr();
+        scanInput.close();
     }
-    public static String calc(String input) throws Exception {
-        byte a;
-        byte b;
-        char[] inputChar = new char[8];
-        char operatorChar = '+';
-        String operatorStr = "";
-        for (byte i = 1; i < input.length(); i++) { //Прохожу циклом по массиву строк, нахожу знак операции и помещаю его в ячейку char operatorChar и элемент строки operatorStr
-            inputChar[i] = input.charAt(i);
-            if (inputChar[i] == '+') {
-                operatorChar = '+';
-                operatorStr = "\\+";
-            }
-            if (inputChar[i] == '-') {
-                operatorChar = '-';
-                operatorStr = "-";
-            }
-            if (inputChar[i] == '*') {
-                operatorChar = '*';
-                operatorStr = "\\*";
-            }
-            if (inputChar[i] == '/') {
-                operatorChar = '/';
-                operatorStr = "/";
-            }
-        }
-        int result;
-        String[] strings = input.split(operatorStr); //Принятую строку разделяю на символы по знаку операции с помощью элемента строки operatorStr
-        if (strings.length != 2) {
-            throw new Exception("Введено больше двух чисел и одного знака операции либо введён неверный знак операции");
-        }
-        try {
-            a = romanNumbers(strings[0]);
-            b = romanNumbers(strings[1]);
-        } catch (ArrayIndexOutOfBoundsException e) { //Исключение+выход из калькулятора при неправильном вводе арифметического выражения
-            throw new Exception("Ошибка - нужно ввести число, знак операции, число - без пробелов.");
-        }
-        if (a == 0 || b == 0) {
-            try {
-                a = Byte.parseByte(strings[0]);
-                b = Byte.parseByte(strings[1]);
-                if (a > 10 || a < 0 || b > 10 || b < 0) { //Исключение+выход из калькулятора при вводе чисел >10 или <0
-                    throw new Exception("Ошибка - калькулятор умеет работать только с целыми арабскими или римскими цифрами от 1 до 10 включительно.");
-                } else if (a == 0 || b == 0) {
-                    throw new Exception("Ошибка - один из операндов равен нулю.");
-                } else {
-                    result = calcInt(a, b, operatorChar);
-                    System.out.println("Ответ: " + result);
-                }
-            } catch (NumberFormatException e) { //Исключение+выход из калькулятора при одновременном вводе римских и арабских цифр
-                throw new Exception("Ошибка - калькулятор умеет работать одновременно только с арабскими или только римскими целыми числами от 1 до 10 включительно.");
-            } catch (ArithmeticException e) { //Исключение+выход из калькулятора при арифметической ошибке-делении на ноль. Не должна выпадать, т.к. есть предыдущее исключение - вводимые цифры больше 0
-                throw new Exception("Ошибка - на ноль делить нельзя.");
-            }
+    public static String calcStr() throws Exception {
+        String inputStr = scanInput.nextLine();
+        String[] inputString = inputStr.split("[-+*/]");
+        String str1 = inputString[0];
+        String str2 = inputString[1];
+        str1 = str1.replace("\"", "");
+//        str1 = str1.trim();
+        str2 = str2.replace("\"", "");
+//        str2 = str2.trim();
+        String result = "";
+
+        String operSign;
+        if (inputStr.contains("+")) {
+            operSign = "+";
+        } else if (inputStr.contains("-")) {
+            operSign = "-";
+        } else if (inputStr.contains("*")) {
+            operSign = "*";
+        } else if (inputStr.contains("/")) {
+            operSign = "/";
         } else {
-            try {
-                result = calcInt(a, b, operatorChar);
-                if (result < 1) { //Исключение+выход из калькулятора при отрицательном ответе или 0 в вычислениях с римскими цифрами
-                    throw new Exception("Ошибка - результатом работы калькулятора с римскими числами могут быть только положительные числа.");
-                }
-                String resultRoman = romanTrans(result-1);
-                System.out.println("Ответ: " + resultRoman);
-            } catch (Exception e) {
-                throw new Exception("Ошибка - результатом работы калькулятора с римскими числами могут быть только положительные числа.");
-            }
+            throw new Exception("Ошибка - знаком операции могут быть только -, +, * или /");
         }
-        return "";
-    }
-    public static int calcInt(byte a, byte b, char operatorChar) { //собственно, вычисление результата в зависимости от введённого знака операции, помещённого в ячейку char operatorChar
-        int result = 0;
-        switch (operatorChar) {
-            case '+':
-                result = a + b;
+        if ((str1.length() > 10) || (str2.length() > 10)) {
+            throw new Exception("Введённая строка должна быть длиной не более 10 символов");
+        }
+        switch (operSign) {
+            case "+":
+                result = str1 + str2;
                 break;
-            case '-':
-                result = a - b;
+            case "-":
+                byte subIndex = (byte) (str1.indexOf(str2));
+                if (subIndex == -1) {
+                    result = str1;
+                } else {
+                    result = str1.substring(0, subIndex) + str1.substring(subIndex + str2.length());
+                }
                 break;
-            case '*':
-                result = a * b;
+            case "*":
+                try {
+                    byte multiStr2 = Byte.parseByte(str2); // здесь String str2 преобразую в byte для дальнейшего умножения строки
+                    if ((multiStr2 < 1) || (multiStr2 > 10)) { // проверяю byte на соответствие условию тз (от 1 до 10)
+                        throw new Exception("Ошибка - калькулятор принимает на вход числа от 1 до 10 включительно, не более.");
+                    } else {
+                        for (int i = 1; i <= multiStr2; i++) {
+                            result += str1;
+                        }
+                    }
+                } catch (Exception e) {
+                    throw new Exception("Ошибка - при умножении или делении вторым операндом может быть только число от 1 до 10 включительно, не более.");
+                }
                 break;
-            case '/':
-                result = a / b;
+            case "/":
+                try {
+                    byte divStr2 = Byte.parseByte(str2); // здесь String str2 преобразую в byte для дальнейшего деления строки
+                    if ((divStr2 < 1) || (divStr2 > 10)) { // проверяю byte на соответствие условию тз (от 1 до 10)
+                        throw new Exception("Ошибка - калькулятор принимает на вход числа от 1 до 10 включительно, не более.");
+                    } else {
+                        byte div = (byte) (str1.length() / divStr2); //делю длину первой строки на число
+                        result = str1.substring(0, div); //возвращаю новую строку, которая является подстрокой str1. Подстрока начинается с 0 символа str1, заканчивается на div символе
+                    }
+                } catch (Exception e) {
+                    throw new Exception("Ошибка - при умножении или делении вторым операндом может быть только число");
+                }
                 break;
             default:
-                break;
+                throw new Exception("Что-то пошло не так");
+        }
+        if (result.length() > 40) {
+            System.out.println("\"" + result.substring(0, 40) + "..." + "\"");
+        } else {
+            System.out.println("\"" + result + "\"");
         }
         return result;
-    }
-    public static String romanTrans(int arabicNumbers) { //Массив строк римских чисел, большая часть из которых нужна для вывода результатов вычисления, подтягивается в строку resultRoman при выводе результата в консоль
-        String[] romanNumbers = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
-                "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX",
-                "XXI", "XXII", "XXIII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX",
-                "*****", "XXXI", "XXXII", "XXXIII", "XXXIV", "XXXV", "XXXVI", "XXXVII", "XXXVIII",
-                "XXXIX", "XL", "XLI", "XLII", "XLIII", "XLIV", "XLV", "XLVI", "XLVII", "XLVIII",
-                "XLIX", "L", "LI", "LII", "LIII", "LIV", "LV", "LVI", "LVII", "LVIII", "LIX", "LX",
-                "LXI", "LXII", "LXIII", "LXIV", "LXV", "LXVI", "LXVII", "LXVIII", "LXIX", "LXX",
-                "LXXI", "LXXII", "LXXIII", "LXXIV", "LXXV", "LXXVI", "LXXVII", "LXXVIII", "LXXIX",
-                "LXXX", "LXXXI", "LXXXII", "LXXXIII", "LXXXIV", "LXXXV", "LXXXVI", "LXXXVII", "LXXXVIII",
-                "LXXXIX", "XC", "XCI", "XCII", "XCIII", "XCIV", "XCV", "XCVI", "XCVII", "XCVIII", "XCIX", "C"};
-        String rN = romanNumbers[arabicNumbers];
-        return rN;
-    }
-    public static byte romanNumbers (String roman){ //метод перевода введённых римских цифр в арабские для дальнейших вычислений
-        byte a = 0;
-        switch (roman) {
-            case "I": return 1;
-            case "II": return 2;
-            case "III": return 3;
-            case "IV": return 4;
-            case "V": return 5;
-            case "VI": return 6;
-            case "VII": return 7;
-            case "VIII": return 8;
-            case "IX": return 9;
-            case "X": return 10;
-        }
-        return a;
     }
 }
