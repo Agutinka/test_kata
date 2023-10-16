@@ -13,9 +13,9 @@ public class Main {
         String str1 = inputString[0];
         String str2 = inputString[1];
         str1 = str1.replace("\"", "");
-//        str1 = str1.trim();
+        str1 = str1.trim();
         str2 = str2.replace("\"", "");
-//        str2 = str2.trim();
+        str2 = str2.trim();
         String result = "";
 
         String operSign;
